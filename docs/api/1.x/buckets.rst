@@ -302,6 +302,14 @@ Retrieving all buckets
         }
 
 
+.. _buckets-delete:
+
+Delete all buckets
+=======================
+
+XXX
+
+
 .. _buckets-default-id:
 
 Personal bucket «default»

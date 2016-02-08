@@ -6,6 +6,14 @@ This document describes changes between each past release.
 1.12.0 (unreleased)
 ===================
 
+**Protocol**
+
+- Delete every (writable) buckets using ``DELETE /v1/buckets``
+- Delete every (writable) collections using ``DELETE /v1/buckets/<>/collections``
+
+Protocol is now version 1.4. See `API changelog <http://kinto.readthedocs.org/en/latest/api/>`_.
+
+
 **Internal changes**
 
 - Changed default duration between retries on error (``Retry-After`` header)

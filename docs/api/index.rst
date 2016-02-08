@@ -11,6 +11,12 @@ API
 Changelog
 ---------
 
+1.4 (unreleased)
+''''''''''''''''
+
+- Delete every (writable) buckets using ``DELETE /v1/buckets``
+- Delete every (writable) collections using ``DELETE /v1/buckets/<>/collections``
+
 1.3 (2016-01-28)
 ''''''''''''''''
 

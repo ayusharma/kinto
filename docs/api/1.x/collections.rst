@@ -26,7 +26,24 @@ A collection is a mapping with the following attribute:
     data from their personnal bucket, by sharing :ref:`its URL using the full ID <buckets-default-id>`.
 
 
-.. _collection-post:
+
+.. _collections-get:
+
+List bucket collections
+=======================
+
+XXX
+
+
+.. _collections-delete:
+
+Delete bucket collections
+=======================
+
+XXX
+
+
+.. _collections-post:
 
 Creating a collection
 =====================
