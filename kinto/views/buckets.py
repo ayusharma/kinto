@@ -3,7 +3,7 @@ from kinto.views import NameGenerator
 
 
 @resource.register(name='bucket',
-                   collection_methods=('GET', 'POST'),
+                   collection_methods=('GET', 'POST', 'DELETE'),
                    collection_path='/buckets',
                    record_path='/buckets/{{id}}')
 class Bucket(resource.ProtectedResource):
