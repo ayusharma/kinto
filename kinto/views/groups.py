@@ -29,50 +29,30 @@ class Group(resource.ProtectedResource):
         parent_id = '/buckets/%s' % bucket_id
         return parent_id
 
-    def collection_delete(self):
-        """Override default behaviour to remove users principals in cascade
-        when group is deleted.
-        """
-        filters = self._extract_filters()
-        groups, _ = self.model.get_records(filters=filters)
-        body = super(Group, self).collection_delete()
-        permission_backend = self.request.registry.permission
-        bucket_id = self.request.matchdict['bucket_id']
-        remove_groups_from_principals(permission_backend, bucket_id, groups)
-        return body
 
-    def delete(self):
-        group = self._get_record_or_404(self.record_id)
-        permission_backend = self.request.registry.permission
-        body = super(Group, self).delete()
-        bucket_id = self.request.matchdict['bucket_id']
-        remove_groups_from_principals(permission_backend, bucket_id, [group])
-        return body
-
-
-def remove_groups_from_principals(permission_backend, bucket_id, groups):
+@subscriber(ResourceChanged,
+            for_resources=('group',),
+            for_actions=('delete'))
+def on_groups_deleted(event):
+    """Some groups were deleted, remove them from users principals.
     """
-    Remove groups from user principals.
+    permission_backend = event.request.registry.permission
 
-    .. note::
-
-        We can't use a ResourceChanged event because we need to access the
-        ``members`` list which is not available in the deleted version
-        (i.e. tombstone) of the record.
-        A possible alternative would be to add a ``remove_principal(group_id)``
-        method on the permission backend.
-    """
-    for group in groups:
-        group_uri = '/buckets/%s/groups/%s' % (bucket_id, group['id'])
-        for member in group['members']:
-            permission_backend.remove_user_principal(member, group_uri)
+    for change in event.impacted_records:
+        group = change['old']
+        group_uri = '/buckets/{bucket_id}/groups/{id}'.format(id=group['id'],
+                                                              **event.payload)
+        permission_backend.remove_principal(group_uri)
 
 
-@subscriber(ResourceChanged, for_resources=('group',),
+@subscriber(ResourceChanged,
+            for_resources=('group',),
             for_actions=('create', 'update'))
-def on_group_changed(event):
+def on_groups_changed(event):
     """Some groups were changed, update users principals.
     """
+    permission_backend = event.request.registry.permission
+
     for change in event.impacted_records:
         if 'old' in change:
             existing_record_members = set(change['old'].get('members', []))
@@ -86,7 +66,6 @@ def on_group_changed(event):
         new_members = new_record_members - existing_record_members
         removed_members = existing_record_members - new_record_members
 
-        permission_backend = event.request.registry.permission
         for member in new_members:
             # Add the group to the member principal.
             permission_backend.add_user_principal(member, group_uri)
